@@ -2,7 +2,7 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0C1222"/>
@@ -15,18 +15,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.9/babel.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-html,body,#root{height:100%;width:100%;overflow:hidden}
-body{background:#0C1222;font-family:'DM Sans',-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{min-height:100%;background:#0C1222;font-family:'DM Sans',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#root{min-height:100%}
 input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
 @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-@supports(padding-top:env(safe-area-inset-top)){.safe-top{padding-top:env(safe-area-inset-top)}.safe-bottom{padding-bottom:env(safe-area-inset-bottom)}}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+input,textarea,select{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useEffect,useRef,useMemo}=React;
+const {useState,useEffect,useMemo}=React;
 
 const STAVY=["Nový","Komunikujem","Ponuka","Získaná","Stratená","Odložená"];
 const STAV_LOOK={
@@ -76,176 +78,64 @@ const downloadCSV=(filename,csvContent)=>{
   const a=document.createElement("a");a.href=url;a.download=filename;
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
 };
-
 const openPDF=(title,htmlBody)=>{
-  const w=window.open("","_blank");
-  if(!w)return false;
+  const w=window.open("","_blank");if(!w)return false;
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title}</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',-apple-system,Helvetica,sans-serif;padding:24px;color:#1a1a1a;font-size:12px;line-height:1.5}
-h1{font-size:20px;margin-bottom:4px;color:#0C1222}
-.sub{font-size:12px;color:#888;margin-bottom:20px}
-table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:11px}
-th{background:#1F4E79;color:#fff;padding:8px 6px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.3px}
-td{padding:7px 6px;border-bottom:1px solid #e0e0e0}
-tr:nth-child(even){background:#f8f9fa}
-.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
-.stat-box{border:2px solid #e0e0e0;border-radius:10px;padding:14px;text-align:center}
-.stat-box .val{font-size:26px;font-weight:800;color:#1F4E79}
-.stat-box .lbl{font-size:11px;color:#888;text-transform:uppercase;font-weight:600}
-.urgent{color:#dc2626;font-weight:700}
-.section{margin-top:24px;padding-top:16px;border-top:2px solid #e0e0e0}
-.section h2{font-size:15px;color:#1F4E79;margin-bottom:10px}
-@media print{body{padding:12px}@page{margin:15mm}}
-</style></head><body>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',-apple-system,Helvetica,sans-serif;padding:24px;color:#1a1a1a;font-size:12px;line-height:1.5}h1{font-size:20px;margin-bottom:4px;color:#0C1222}.sub{font-size:12px;color:#888;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:11px}th{background:#1F4E79;color:#fff;padding:8px 6px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase}td{padding:7px 6px;border-bottom:1px solid #e0e0e0}tr:nth-child(even){background:#f8f9fa}.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700}.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}.stat-box{border:2px solid #e0e0e0;border-radius:10px;padding:14px;text-align:center}.stat-box .val{font-size:26px;font-weight:800;color:#1F4E79}.stat-box .lbl{font-size:11px;color:#888;text-transform:uppercase;font-weight:600}.urgent{color:#dc2626;font-weight:700}.section{margin-top:24px;padding-top:16px;border-top:2px solid #e0e0e0}.section h2{font-size:15px;color:#1F4E79;margin-bottom:10px}@media print{body{padding:12px}@page{margin:15mm}}</style></head><body>
 <h1>Akvizície – ${title}</h1>
 <div class="sub">Vygenerované: ${new Date().toLocaleDateString("sk-SK")} o ${new Date().toLocaleTimeString("sk-SK",{hour:"2-digit",minute:"2-digit"})}</div>
 ${htmlBody}
-<script>setTimeout(()=>window.print(),400)<\/script>
-</body></html>`);
-  w.document.close();
-  return true;
+<script>setTimeout(()=>window.print(),400)<\/script></body></html>`);
+  w.document.close();return true;
 };
-
 const escCSV=(v)=>{const s=String(v??"");return s.includes(",")||s.includes('"')||s.includes("\n")?`"${s.replace(/"/g,'""')}"`:s};
 
-// 1. Kompletný zoznam
 const exportFullCSV=(data)=>{
   const hdr=["Klient","Oslovenie","Dátum oslovenia","Vec","Reagoval","Ako reagoval","Ponuka","Odmena €","Stav","Moja akcia","Termín","Praetor","Poznámka"];
   const rows=data.map(d=>[d.klient,d.oslovenie,d.datum,d.vec,d.reagoval?"Áno":"Nie",d.akoReagoval,d.ponuka?"Áno":"Nie",d.odmena||"",d.stav,d.mojaAkcia?"Áno":"Nie",d.termin,d.praetor?"Áno":"Nie",d.poznamka].map(escCSV).join(","));
   downloadCSV("akvizicie_zoznam.csv",[hdr.join(","),...rows].join("\n"));
 };
-
 const exportFullPDF=(data)=>{
-  const rows=data.map(d=>`<tr>
-    <td><strong>${d.klient}</strong></td>
-    <td>${d.vec||"—"}</td>
-    <td>${fmtDate(d.datum)}</td>
-    <td><span class="badge" style="background:${STAV_LOOK[d.stav]?.bg||"#eee"};color:${STAV_LOOK[d.stav]?.tx||"#333"}">${d.stav}</span></td>
-    <td>${d.ponuka&&d.odmena?fmt(d.odmena)+" €":"—"}</td>
-    <td>${d.reagoval?"✓":"✗"}</td>
-    <td>${d.praetor?"✓":"✗"}</td>
-    <td>${d.termin?fmtDate(d.termin):"—"}</td>
-  </tr>`).join("");
-  openPDF("Kompletný zoznam",`
-    <table><thead><tr><th>Klient</th><th>Vec</th><th>Dátum</th><th>Stav</th><th>Odmena</th><th>Reag.</th><th>Praetor</th><th>Termín</th></tr></thead>
-    <tbody>${rows}</tbody></table>
-    <div style="font-size:11px;color:#888">Celkom záznamov: ${data.length}</div>`);
+  const rows=data.map(d=>`<tr><td><strong>${d.klient}</strong></td><td>${d.vec||"—"}</td><td>${fmtDate(d.datum)}</td><td><span class="badge" style="background:${STAV_LOOK[d.stav]?.bg||"#eee"};color:${STAV_LOOK[d.stav]?.tx||"#333"}">${d.stav}</span></td><td>${d.ponuka&&d.odmena?fmt(d.odmena)+" €":"—"}</td><td>${d.reagoval?"✓":"✗"}</td><td>${d.praetor?"✓":"✗"}</td><td>${d.termin?fmtDate(d.termin):"—"}</td></tr>`).join("");
+  openPDF("Kompletný zoznam",`<table><thead><tr><th>Klient</th><th>Vec</th><th>Dátum</th><th>Stav</th><th>Odmena</th><th>Reag.</th><th>Praetor</th><th>Termín</th></tr></thead><tbody>${rows}</tbody></table><div style="font-size:11px;color:#888">Celkom záznamov: ${data.length}</div>`);
 };
-
-// 2. Súhrn pipeline
 const exportSummaryCSV=(data)=>{
   const lines=["Fáza,Počet,Suma odmien €"];
-  STAVY.forEach(s=>{
-    const items=data.filter(d=>d.stav===s);
-    const sum=items.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0);
-    lines.push(`${s},${items.length},${sum}`);
-  });
-  const total=data.filter(d=>d.ponuka&&ACTIVE_STAVY.includes(d.stav)).reduce((a,d)=>a+d.odmena,0);
-  lines.push(`\nAktívne celkom,${data.filter(d=>ACTIVE_STAVY.includes(d.stav)).length},${total}`);
+  STAVY.forEach(s=>{const items=data.filter(d=>d.stav===s);lines.push(`${s},${items.length},${items.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0)}`)});
   downloadCSV("akvizicie_suhrn.csv",lines.join("\n"));
 };
-
 const exportSummaryPDF=(data)=>{
   const active=data.filter(d=>ACTIVE_STAVY.includes(d.stav));
   const totalOdmena=active.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0);
-  const won=data.filter(d=>d.stav==="Získaná");
-  const lost=data.filter(d=>d.stav==="Stratená");
+  const won=data.filter(d=>d.stav==="Získaná");const lost=data.filter(d=>d.stav==="Stratená");
   const wonSum=won.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0);
-
-  const phaseRows=STAVY.map(s=>{
-    const items=data.filter(d=>d.stav===s);
-    const sum=items.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0);
-    return`<tr><td><span class="badge" style="background:${STAV_LOOK[s].bg};color:${STAV_LOOK[s].tx}">${s}</span></td><td style="text-align:center;font-weight:700">${items.length}</td><td style="text-align:right">${sum?fmt(sum)+" €":"—"}</td></tr>`;
-  }).join("");
-
-  openPDF("Súhrn pipeline",`
-    <div class="stat-grid">
-      <div class="stat-box"><div class="val">${active.length}</div><div class="lbl">Aktívne</div></div>
-      <div class="stat-box"><div class="val">${totalOdmena?fmt(totalOdmena)+" €":"0 €"}</div><div class="lbl">V ponukách</div></div>
-      <div class="stat-box"><div class="val">${won.length}</div><div class="lbl">Získané</div></div>
-      <div class="stat-box"><div class="val">${wonSum?fmt(wonSum)+" €":"0 €"}</div><div class="lbl">Získané odmeny</div></div>
-    </div>
-    <table><thead><tr><th>Fáza</th><th style="text-align:center">Počet</th><th style="text-align:right">Suma odmien</th></tr></thead>
-    <tbody>${phaseRows}</tbody></table>`);
+  const phaseRows=STAVY.map(s=>{const items=data.filter(d=>d.stav===s);const sum=items.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0);return`<tr><td><span class="badge" style="background:${STAV_LOOK[s].bg};color:${STAV_LOOK[s].tx}">${s}</span></td><td style="text-align:center;font-weight:700">${items.length}</td><td style="text-align:right">${sum?fmt(sum)+" €":"—"}</td></tr>`}).join("");
+  openPDF("Súhrn pipeline",`<div class="stat-grid"><div class="stat-box"><div class="val">${active.length}</div><div class="lbl">Aktívne</div></div><div class="stat-box"><div class="val">${totalOdmena?fmt(totalOdmena)+" €":"0 €"}</div><div class="lbl">V ponukách</div></div><div class="stat-box"><div class="val">${won.length}</div><div class="lbl">Získané</div></div><div class="stat-box"><div class="val">${wonSum?fmt(wonSum)+" €":"0 €"}</div><div class="lbl">Získané odmeny</div></div></div><table><thead><tr><th>Fáza</th><th style="text-align:center">Počet</th><th style="text-align:right">Suma odmien</th></tr></thead><tbody>${phaseRows}</tbody></table>`);
 };
-
-// 3. Moje úlohy
 const exportTasksCSV=(data)=>{
   const tasks=data.filter(d=>d.mojaAkcia&&ACTIVE_STAVY.includes(d.stav)).sort((a,b)=>daysUntil(a.termin)-daysUntil(b.termin));
   const lines=["Klient,Vec,Termín,Stav,Poznámka"];
   tasks.forEach(d=>lines.push([d.klient,d.vec,d.termin||"",d.stav,d.poznamka].map(escCSV).join(",")));
   downloadCSV("akvizicie_ulohy.csv",lines.join("\n"));
 };
-
 const exportTasksPDF=(data)=>{
   const tasks=data.filter(d=>d.mojaAkcia&&ACTIVE_STAVY.includes(d.stav)).sort((a,b)=>daysUntil(a.termin)-daysUntil(b.termin));
-  const rows=tasks.map(d=>{
-    const dl=deadlineLabel(d.termin);
-    const cls=dl&&dl.urgent?' class="urgent"':"";
-    return`<tr><td><strong>${d.klient}</strong><br/><span style="color:#888">${d.vec||"—"}</span></td>
-    <td${cls}>${d.termin?fmtDate(d.termin):"—"}${dl?" ("+dl.text+")":""}</td>
-    <td><span class="badge" style="background:${STAV_LOOK[d.stav]?.bg};color:${STAV_LOOK[d.stav]?.tx}">${d.stav}</span></td>
-    <td>${d.poznamka||"—"}</td></tr>`;
-  }).join("");
-  openPDF("Moje úlohy",`
-    <p style="margin-bottom:16px;font-size:13px"><strong>${tasks.length}</strong> úloh čaká na moju akciu</p>
-    <table><thead><tr><th>Klient / Vec</th><th>Termín</th><th>Stav</th><th>Poznámka</th></tr></thead>
-    <tbody>${rows}</tbody></table>`);
+  const rows=tasks.map(d=>{const dl=deadlineLabel(d.termin);const cls=dl&&dl.urgent?' class="urgent"':"";return`<tr><td><strong>${d.klient}</strong><br/><span style="color:#888">${d.vec||"—"}</span></td><td${cls}>${d.termin?fmtDate(d.termin):"—"}${dl?" ("+dl.text+")":""}</td><td><span class="badge" style="background:${STAV_LOOK[d.stav]?.bg};color:${STAV_LOOK[d.stav]?.tx}">${d.stav}</span></td><td>${d.poznamka||"—"}</td></tr>`}).join("");
+  openPDF("Moje úlohy",`<p style="margin-bottom:16px;font-size:13px"><strong>${tasks.length}</strong> úloh čaká na moju akciu</p><table><thead><tr><th>Klient / Vec</th><th>Termín</th><th>Stav</th><th>Poznámka</th></tr></thead><tbody>${rows}</tbody></table>`);
 };
-
-// 4. Mesačný prehľad
 const exportMonthlyCSV=(data)=>{
-  const months={};
-  data.forEach(d=>{
-    const m=d.datum?d.datum.slice(0,7):"Neznámy";
-    if(!months[m])months[m]={ziskane:0,stratene:0,odlozene:0,nove:0,sumZisk:0,sumStrat:0};
-    if(d.stav==="Získaná"){months[m].ziskane++;months[m].sumZisk+=d.odmena||0}
-    else if(d.stav==="Stratená"){months[m].stratene++;months[m].sumStrat+=d.odmena||0}
-    else if(d.stav==="Odložená")months[m].odlozene++;
-    else months[m].nove++;
-  });
-  const lines=["Mesiac,Nové/Aktívne,Získané,Suma získaných €,Stratené,Suma stratených €,Odložené"];
-  Object.keys(months).sort().reverse().forEach(m=>{
-    const r=months[m];
-    lines.push(`${m},${r.nove},${r.ziskane},${r.sumZisk},${r.stratene},${r.sumStrat},${r.odlozene}`);
-  });
+  const months={};data.forEach(d=>{const m=d.datum?d.datum.slice(0,7):"Neznámy";if(!months[m])months[m]={z:0,s:0,o:0,a:0,sz:0,ss:0};if(d.stav==="Získaná"){months[m].z++;months[m].sz+=d.odmena||0}else if(d.stav==="Stratená"){months[m].s++;months[m].ss+=d.odmena||0}else if(d.stav==="Odložená")months[m].o++;else months[m].a++});
+  const lines=["Mesiac,Aktívne,Získané,Suma získaných €,Stratené,Suma stratených €,Odložené"];
+  Object.keys(months).sort().reverse().forEach(m=>{const r=months[m];lines.push(`${m},${r.a},${r.z},${r.sz},${r.s},${r.ss},${r.o}`)});
   downloadCSV("akvizicie_mesacny.csv",lines.join("\n"));
 };
-
 const exportMonthlyPDF=(data)=>{
-  const months={};
-  data.forEach(d=>{
-    const m=d.datum?d.datum.slice(0,7):"Neznámy";
-    if(!months[m])months[m]={ziskane:[],stratene:[],odlozene:[],aktivne:[]};
-    if(d.stav==="Získaná")months[m].ziskane.push(d);
-    else if(d.stav==="Stratená")months[m].stratene.push(d);
-    else if(d.stav==="Odložená")months[m].odlozene.push(d);
-    else months[m].aktivne.push(d);
-  });
-  const monthNames=["","Január","Február","Marec","Apríl","Máj","Jún","Júl","August","September","Október","November","December"];
-  const sections=Object.keys(months).sort().reverse().map(m=>{
-    const r=months[m];
-    const [y,mo]=m.split("-");
-    const label=monthNames[parseInt(mo)]+" "+y;
-    const zSum=r.ziskane.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0);
-    const sSum=r.stratene.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0);
-    return`<div class="section">
-      <h2>${label}</h2>
-      <div class="stat-grid">
-        <div class="stat-box"><div class="val" style="color:#059669">${r.ziskane.length}</div><div class="lbl">Získané${zSum?" · "+fmt(zSum)+" €":""}</div></div>
-        <div class="stat-box"><div class="val" style="color:#dc2626">${r.stratene.length}</div><div class="lbl">Stratené${sSum?" · "+fmt(sSum)+" €":""}</div></div>
-      </div>
-      ${r.ziskane.length?`<table><thead><tr><th colspan="3" style="background:#059669">Získané</th></tr><tr><th>Klient</th><th>Vec</th><th>Odmena</th></tr></thead><tbody>${r.ziskane.map(d=>`<tr><td>${d.klient}</td><td>${d.vec}</td><td>${d.odmena?fmt(d.odmena)+" €":"—"}</td></tr>`).join("")}</tbody></table>`:""}
-      ${r.stratene.length?`<table><thead><tr><th colspan="3" style="background:#dc2626">Stratené</th></tr><tr><th>Klient</th><th>Vec</th><th>Odmena</th></tr></thead><tbody>${r.stratene.map(d=>`<tr><td>${d.klient}</td><td>${d.vec}</td><td>${d.odmena?fmt(d.odmena)+" €":"—"}</td></tr>`).join("")}</tbody></table>`:""}
-      <p style="font-size:11px;color:#888">Aktívne: ${r.aktivne.length} · Odložené: ${r.odlozene.length}</p>
-    </div>`;
-  }).join("");
+  const months={};data.forEach(d=>{const m=d.datum?d.datum.slice(0,7):"Neznámy";if(!months[m])months[m]={ziskane:[],stratene:[],odlozene:[],aktivne:[]};if(d.stav==="Získaná")months[m].ziskane.push(d);else if(d.stav==="Stratená")months[m].stratene.push(d);else if(d.stav==="Odložená")months[m].odlozene.push(d);else months[m].aktivne.push(d)});
+  const mn=["","Január","Február","Marec","Apríl","Máj","Jún","Júl","August","September","Október","November","December"];
+  const sections=Object.keys(months).sort().reverse().map(m=>{const r=months[m];const[y,mo]=m.split("-");const label=mn[parseInt(mo)]+" "+y;const zSum=r.ziskane.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0);const sSum=r.stratene.filter(d=>d.ponuka).reduce((a,d)=>a+d.odmena,0);
+  return`<div class="section"><h2>${label}</h2><div class="stat-grid"><div class="stat-box"><div class="val" style="color:#059669">${r.ziskane.length}</div><div class="lbl">Získané${zSum?" · "+fmt(zSum)+" €":""}</div></div><div class="stat-box"><div class="val" style="color:#dc2626">${r.stratene.length}</div><div class="lbl">Stratené${sSum?" · "+fmt(sSum)+" €":""}</div></div></div>${r.ziskane.length?`<table><thead><tr><th colspan="3" style="background:#059669">Získané</th></tr><tr><th>Klient</th><th>Vec</th><th>Odmena</th></tr></thead><tbody>${r.ziskane.map(d=>`<tr><td>${d.klient}</td><td>${d.vec}</td><td>${d.odmena?fmt(d.odmena)+" €":"—"}</td></tr>`).join("")}</tbody></table>`:""}${r.stratene.length?`<table><thead><tr><th colspan="3" style="background:#dc2626">Stratené</th></tr><tr><th>Klient</th><th>Vec</th><th>Odmena</th></tr></thead><tbody>${r.stratene.map(d=>`<tr><td>${d.klient}</td><td>${d.vec}</td><td>${d.odmena?fmt(d.odmena)+" €":"—"}</td></tr>`).join("")}</tbody></table>`:""}<p style="font-size:11px;color:#888">Aktívne: ${r.aktivne.length} · Odložené: ${r.odlozene.length}</p></div>`}).join("");
   openPDF("Mesačný prehľad",sections);
 };
-
 
 // ═══════════════════════════════════════
 // UI COMPONENTS
@@ -267,11 +157,10 @@ function App(){
   const [search,setSearch]=useState("");
   const [filter,setFilter]=useState("");
   const [toast,setToast]=useState("");
-  const topRef=useRef(null);
 
   const save=(d)=>{setData(d);saveData(d)};
   const flash=(m)=>{setToast(m);setTimeout(()=>setToast(""),2000)};
-  const go=(v,id)=>{setView(v);setEditId(id??null);setTimeout(()=>topRef.current?.scrollTo(0,0),50)};
+  const go=(v,id)=>{setView(v);setEditId(id??null);window.scrollTo(0,0)};
 
   const stats=useMemo(()=>{
     const active=data.filter(d=>ACTIVE_STAVY.includes(d.stav));
@@ -296,7 +185,6 @@ function App(){
 
   const statTap=(f)=>{setFilter(f);setView("list")};
 
-  // ─── Quick Add ───
   const QuickAdd=()=>{
     const [f,setF]=useState(blank());const u=(k,v)=>setF(p=>({...p,[k]:v}));
     const handleSave=()=>{if(!f.klient.trim()){flash("Vyplňte klienta");return}save([...data,f]);flash("Pridané ✓");go("list")};
@@ -304,7 +192,7 @@ function App(){
       <button onClick={()=>go("list")} style={css.backBtn}>← Späť</button>
       <h2 style={css.screenTitle}>Rýchle pridanie</h2>
       <p style={{fontSize:13,color:"#64748B",margin:"0 0 16px"}}>Zapíšte základ, detaily doplníte neskôr.</p>
-      <Label>Klient</Label><input style={css.input} value={f.klient} onChange={e=>u("klient",e.target.value)} placeholder="Názov firmy alebo meno" autoFocus/>
+      <Label>Klient</Label><input style={css.input} value={f.klient} onChange={e=>u("klient",e.target.value)} placeholder="Názov firmy alebo meno"/>
       <Label>V akej veci</Label><input style={css.input} value={f.vec} onChange={e=>u("vec",e.target.value)} placeholder="Stručne – o čo ide?"/>
       <Label>Ako ma oslovil</Label><SelectField value={f.oslovenie} onChange={v=>u("oslovenie",v)} options={OSLOVENIE}/>
       <Label>Urobiť do</Label><input style={css.input} type="date" value={f.termin} onChange={e=>u("termin",e.target.value)}/>
@@ -313,7 +201,6 @@ function App(){
     </div>);
   };
 
-  // ─── Edit ───
   const EditScreen=()=>{
     const existing=data.find(d=>d.id===editId);if(!existing)return null;
     const [f,setF]=useState({...existing});const u=(k,v)=>setF(p=>({...p,[k]:v}));
@@ -354,12 +241,11 @@ function App(){
     </div>);
   };
 
-  // ─── Export Screen ───
   const ExportScreen=()=>{
     const tasks=data.filter(d=>d.mojaAkcia&&ACTIVE_STAVY.includes(d.stav));
     const exports=[
-      {icon:"📋",title:"Kompletný zoznam",desc:`Všetkých ${data.length} záznamov so všetkými údajmi`,csv:()=>exportFullCSV(data),pdf:()=>exportFullPDF(data)},
-      {icon:"📊",title:"Súhrn pipeline",desc:"Počty podľa fáz, sumy odmien, štatistiky",csv:()=>exportSummaryCSV(data),pdf:()=>exportSummaryPDF(data)},
+      {icon:"📋",title:"Kompletný zoznam",desc:`Všetkých ${data.length} záznamov`,csv:()=>exportFullCSV(data),pdf:()=>exportFullPDF(data)},
+      {icon:"📊",title:"Súhrn pipeline",desc:"Počty podľa fáz, sumy odmien",csv:()=>exportSummaryCSV(data),pdf:()=>exportSummaryPDF(data)},
       {icon:"⚡",title:"Moje úlohy",desc:`${tasks.length} úloh čaká na moju akciu`,csv:()=>exportTasksCSV(data),pdf:()=>exportTasksPDF(data)},
       {icon:"📅",title:"Mesačný prehľad",desc:"Získané a stratené podľa mesiacov",csv:()=>exportMonthlyCSV(data),pdf:()=>exportMonthlyPDF(data)},
     ];
@@ -371,25 +257,17 @@ function App(){
         <div key={i} style={{background:"linear-gradient(135deg,#1E293B,#172033)",borderRadius:16,padding:"16px 18px",border:"1px solid rgba(255,255,255,0.05)",marginBottom:12}}>
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
             <span style={{fontSize:22}}>{ex.icon}</span>
-            <div style={{flex:1}}>
-              <div style={{fontSize:14,fontWeight:700,color:"#F1F5F9"}}>{ex.title}</div>
-              <div style={{fontSize:12,color:"#64748B"}}>{ex.desc}</div>
-            </div>
+            <div style={{flex:1}}><div style={{fontSize:14,fontWeight:700,color:"#F1F5F9"}}>{ex.title}</div><div style={{fontSize:12,color:"#64748B"}}>{ex.desc}</div></div>
           </div>
           <div style={{display:"flex",gap:8}}>
-            <button onClick={()=>{ex.csv();flash("CSV stiahnuté ✓")}} style={{...css.exportBtn,background:"rgba(16,185,129,0.1)",color:"#10B981",borderColor:"rgba(16,185,129,0.2)"}}>
-              📥 CSV
-            </button>
-            <button onClick={()=>{const ok=ex.pdf();if(ok)flash("PDF otvorené ✓");else flash("Povoľte pop-up okná")}} style={{...css.exportBtn,background:"rgba(239,68,68,0.08)",color:"#EF4444",borderColor:"rgba(239,68,68,0.2)"}}>
-              📄 PDF
-            </button>
+            <button onClick={()=>{ex.csv();flash("CSV stiahnuté ✓")}} style={{...css.exportBtn,background:"rgba(16,185,129,0.1)",color:"#10B981",borderColor:"rgba(16,185,129,0.2)"}}>📥 CSV</button>
+            <button onClick={()=>{const ok=ex.pdf();if(ok)flash("PDF otvorené ✓");else flash("Povoľte pop-up okná")}} style={{...css.exportBtn,background:"rgba(239,68,68,0.08)",color:"#EF4444",borderColor:"rgba(239,68,68,0.2)"}}>📄 PDF</button>
           </div>
         </div>
       ))}
     </div>);
   };
 
-  // ─── List ───
   const ListScreen=()=>(
     <div style={{padding:"0 16px 30px"}}>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
@@ -431,25 +309,23 @@ function App(){
 
   return(
     <div style={css.app}>
-      <div ref={topRef} style={{height:"100vh",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-        <div style={css.header} className="safe-top">
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <div>
-              <div style={css.logo}>Akvizície</div>
-              {view==="list"&&<div style={{fontSize:12,color:"#64748B",fontWeight:500}}>Advokátska kancelária</div>}
-            </div>
-            {view==="list"&&<div style={{display:"flex",gap:8}}>
-              <button onClick={()=>go("export")} style={css.exportHeaderBtn}>Exporty</button>
-              <button onClick={()=>go("quick")} style={css.addBtn}>+ Nová</button>
-            </div>}
+      <div style={{...css.header,paddingTop:"max(20px, env(safe-area-inset-top, 20px))"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={css.logo}>Akvizície</div>
+            {view==="list"&&<div style={{fontSize:12,color:"#64748B",fontWeight:500}}>Advokátska kancelária</div>}
           </div>
+          {view==="list"&&<div style={{display:"flex",gap:8}}>
+            <button onClick={()=>go("export")} style={css.exportHeaderBtn}>Exporty</button>
+            <button onClick={()=>go("quick")} style={css.addBtn}>+ Nová</button>
+          </div>}
         </div>
-        {view==="list"&&<ListScreen/>}
-        {view==="quick"&&<QuickAdd/>}
-        {view==="edit"&&<EditScreen/>}
-        {view==="export"&&<ExportScreen/>}
-        <div className="safe-bottom" style={{height:20}}/>
       </div>
+      {view==="list"&&<ListScreen/>}
+      {view==="quick"&&<QuickAdd/>}
+      {view==="edit"&&<EditScreen/>}
+      {view==="export"&&<ExportScreen/>}
+      <div style={{height:"max(30px, env(safe-area-inset-bottom, 30px))"}}/>
       {toast&&<div style={css.toast}>{toast}</div>}
     </div>
   );
@@ -457,7 +333,7 @@ function App(){
 
 const css={
   app:{fontFamily:"'DM Sans',-apple-system,sans-serif",maxWidth:430,margin:"0 auto",minHeight:"100vh",background:"#0C1222",color:"#E2E8F0",position:"relative"},
-  header:{padding:"20px 16px 14px",background:"linear-gradient(135deg,#0C1222,#162032)"},
+  header:{padding:"20px 16px 14px",background:"linear-gradient(135deg,#0C1222,#162032)",position:"sticky",top:0,zIndex:40},
   logo:{fontSize:24,fontWeight:800,letterSpacing:-.5,background:"linear-gradient(135deg,#F1F5F9,#CBD5E1)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"},
   addBtn:{padding:"8px 16px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#F59E0B,#D97706)",color:"#0C1222",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit"},
   exportHeaderBtn:{padding:"8px 14px",borderRadius:12,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#94A3B8",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"},
@@ -465,15 +341,15 @@ const css={
   stat:(c1,c2)=>({background:`linear-gradient(135deg,${c1}22,${c2}11)`,border:`1px solid ${c1}33`,borderRadius:14,padding:"14px 16px",cursor:"pointer",transition:"transform 0.12s"}),
   statLabel:{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.55)",textTransform:"uppercase",letterSpacing:.4},
   statVal:{fontSize:22,fontWeight:800,color:"#F1F5F9",marginTop:2},
-  input:{width:"100%",padding:"11px 14px",borderRadius:12,border:"1px solid rgba(255,255,255,0.08)",background:"rgba(255,255,255,0.04)",color:"#E2E8F0",fontSize:14,fontFamily:"inherit",outline:"none",boxSizing:"border-box"},
-  select:{width:"100%",padding:"11px 14px",borderRadius:12,border:"1px solid rgba(255,255,255,0.08)",background:"#1E293B",color:"#E2E8F0",fontSize:14,fontFamily:"inherit",outline:"none",appearance:"none",boxSizing:"border-box"},
+  input:{width:"100%",padding:"11px 14px",borderRadius:12,border:"1px solid rgba(255,255,255,0.08)",background:"rgba(255,255,255,0.04)",color:"#E2E8F0",fontSize:16,fontFamily:"inherit",outline:"none",boxSizing:"border-box"},
+  select:{width:"100%",padding:"11px 14px",borderRadius:12,border:"1px solid rgba(255,255,255,0.08)",background:"#1E293B",color:"#E2E8F0",fontSize:16,fontFamily:"inherit",outline:"none",appearance:"none",boxSizing:"border-box"},
   filterBtn:{border:"none",cursor:"pointer",whiteSpace:"nowrap",padding:"6px 12px",borderRadius:20,fontSize:11,fontWeight:700,fontFamily:"inherit",transition:"all 0.2s"},
-  card:{background:"linear-gradient(135deg,#1E293B,#172033)",borderRadius:16,padding:"14px 16px",marginBottom:10,border:"1px solid rgba(255,255,255,0.05)",cursor:"pointer",transition:"transform 0.12s"},
+  card:{background:"linear-gradient(135deg,#1E293B,#172033)",borderRadius:16,padding:"14px 16px",marginBottom:10,border:"1px solid rgba(255,255,255,0.05)",cursor:"pointer"},
   toggleBtn:{padding:"10px 18px",borderRadius:12,border:"1px solid rgba(255,255,255,0.06)",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit",transition:"all 0.2s",background:"transparent",color:"#475569"},
   toggleActive:{background:"rgba(16,185,129,0.12)",color:"#10B981",borderColor:"rgba(16,185,129,0.25)"},
   toggleActiveGray:{background:"rgba(255,255,255,0.06)",color:"#94A3B8",borderColor:"rgba(255,255,255,0.1)"},
   toggleActiveAmber:{background:"rgba(245,158,11,0.15)",color:"#F59E0B",borderColor:"rgba(245,158,11,0.3)"},
-  exportBtn:{flex:1,padding:"10px",borderRadius:12,border:"1px solid",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit",transition:"all 0.2s"},
+  exportBtn:{flex:1,padding:"10px",borderRadius:12,border:"1px solid",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit"},
   primaryBtn:{width:"100%",padding:"14px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#F59E0B,#D97706)",color:"#0C1222",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit",marginTop:24},
   deleteBtn:{width:"100%",padding:"12px",borderRadius:14,border:"1px solid rgba(239,68,68,0.25)",background:"transparent",color:"#EF4444",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"inherit",marginTop:10},
   backBtn:{background:"none",border:"none",color:"#F59E0B",fontSize:14,fontWeight:600,cursor:"pointer",padding:"8px 0",fontFamily:"inherit"},
